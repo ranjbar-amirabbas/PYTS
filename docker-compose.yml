@@ -1,0 +1,91 @@
+# Persian Transcription API - Docker Compose Configuration
+# This file provides easy deployment of the Persian transcription service
+# 
+# Quick Start:
+#   1. Copy .env.example to .env and adjust settings
+#   2. Run: docker-compose up -d
+#   3. Check health: curl http://localhost:8000/api/v1/health
+#
+# Requirements: 6.3, 6.4
+
+services:
+  persian-transcription-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Build-time argument for Whisper model size
+        # Options: tiny, base, small, medium, large
+        WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-medium}
+    
+    image: persian-transcription-api:latest
+    
+    container_name: persian-transcription-api
+    
+    ports:
+      # Map container port 8000 to host port (default 8000)
+      - "${API_PORT:-8000}:8000"
+    
+    environment:
+      # Whisper model configuration
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-medium}
+      
+      # Concurrency configuration
+      MAX_CONCURRENT_WORKERS: ${MAX_CONCURRENT_WORKERS:-4}
+      MAX_QUEUE_SIZE: ${MAX_QUEUE_SIZE:-100}
+      
+      # File upload limits
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-500}
+      
+      # API configuration
+      API_PORT: 8000
+      API_HOST: 0.0.0.0
+      
+      # Logging configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      
+      # Job cleanup configuration
+      JOB_CLEANUP_MAX_AGE_HOURS: ${JOB_CLEANUP_MAX_AGE_HOURS:-24}
+      
+      # Streaming configuration
+      STREAM_MIN_CHUNK_SIZE: ${STREAM_MIN_CHUNK_SIZE:-102400}  # 100 KB
+      STREAM_MAX_BUFFER_SIZE: ${STREAM_MAX_BUFFER_SIZE:-10485760}  # 10 MB
+    
+    volumes:
+      # Volume mounts for persistence and data management
+      
+      # Whisper model cache - stores downloaded model weights
+      # Using named volume for better performance and persistence
+      - whisper-models:/root/.cache/whisper
+      
+      # Temporary audio processing directory
+      # Files are stored here during transcription processing
+      - ./temp:/app/temp
+      
+      # Application logs directory
+      # All service logs are written here for monitoring and debugging
+      - ./logs:/app/logs
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; import json; response = urllib.request.urlopen('http://localhost:8000/api/v1/health'); data = json.loads(response.read()); exit(0 if data.get('status') == 'healthy' and data.get('model_loaded') else 1)"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    
+    # Resource limits (optional, adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          # Adjust based on model size and concurrent workers
+          # medium model needs ~5GB RAM, large needs ~10GB
+          memory: 6G
+        reservations:
+          memory: 2G
+
+volumes:
+  # Named volume for Whisper model cache
+  whisper-models:
+    driver: local

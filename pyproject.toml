@@ -1,0 +1,45 @@
+[project]
+name = "persian-transcription-api"
+version = "0.1.0"
+description = "A Dockerized REST API service for Persian (Farsi) speech transcription"
+authors = [
+    {name = "Persian Transcription API Team"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
+    "openai-whisper>=20231117",
+    "ffmpeg-python>=0.2.0",
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "hypothesis>=6.98.3",
+    "httpx>=0.26.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+markers = [
+    "property_test: marks tests as property-based tests (deselect with '-m \"not property_test\"')",
+    "integration: marks tests as integration tests",
+    "performance: marks tests as performance tests",
+]
+
+[tool.hypothesis]
+max_examples = 100
