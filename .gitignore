@@ -1,0 +1,79 @@
+# .NET build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+*.cache
+
+# .NET specific
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Environment files
+.env
+.env.local
+
+# Docker
+.dockerignore
+
+# Audio files (for testing)
+*.wav
+*.mp3
+*.ogg
+*.m4a
+!tests/fixtures/*.wav
+!tests/fixtures/*.mp3
+!tests/fixtures/*.ogg
+!tests/fixtures/*.m4a
+
+# Whisper model files
+*.bin
+!ggml-*.bin
+
+# OS files
+Thumbs.db
+.DS_Store
