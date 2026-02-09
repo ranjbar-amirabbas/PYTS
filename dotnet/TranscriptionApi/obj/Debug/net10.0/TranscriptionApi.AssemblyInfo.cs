@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TranscriptionApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8a718864e2989373fbf7359c607fbf431eafde6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ea0155c8412dd4ed3834eb052808a14344e5e5b")]
 [assembly: System.Reflection.AssemblyProductAttribute("TranscriptionApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TranscriptionApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

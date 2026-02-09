@@ -34,6 +34,7 @@ public class StreamingTranscriptionController : ControllerBase
     /// </summary>
     /// <returns>WebSocket connection handling task</returns>
     [Route("/api/v1/transcribe/stream")]
+    [ApiExplorerSettings(IgnoreApi = true)] // Exclude from Swagger - WebSocket endpoints not supported
     public async Task HandleWebSocket()
     {
         if (!HttpContext.WebSockets.IsWebSocketRequest)

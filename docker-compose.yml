@@ -1,0 +1,97 @@
+version: '3.8'
+
+# Multi-service Docker Compose for Transcription APIs
+# Includes both Python (FastAPI) and .NET (ASP.NET Core) implementations
+
+services:
+  # Python FastAPI Transcription Service
+  python-transcription-api:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+      args:
+        WHISPER_MODEL_SIZE: medium
+    container_name: python-transcription-api
+    ports:
+      - "8000:8000"
+    environment:
+      - WHISPER_MODEL_SIZE=medium
+      - MAX_CONCURRENT_WORKERS=4
+      - MAX_QUEUE_SIZE=100
+      - MAX_FILE_SIZE_MB=500
+      - API_PORT=8000
+      - API_HOST=0.0.0.0
+      - LOG_LEVEL=INFO
+      - JOB_CLEANUP_MAX_AGE_HOURS=24
+    volumes:
+      - python-temp:/app/temp
+      - python-logs:/app/logs
+      - ~/.cache/whisper:/root/.cache/whisper
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; import json; response = urllib.request.urlopen('http://localhost:8000/api/v1/health'); data = json.loads(response.read()); exit(0 if data.get('status') == 'healthy' else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - transcription-network
+
+  # .NET ASP.NET Core Transcription Service
+  dotnet-transcription-api:
+    build:
+      context: ./dotnet/TranscriptionApi
+      dockerfile: Dockerfile
+      args:
+        WHISPER_MODEL_SIZE: medium
+    container_name: dotnet-transcription-api
+    ports:
+      - "5226:5226"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Transcription__WhisperModelSize=medium
+      - Transcription__MaxConcurrentWorkers=4
+      - Transcription__MaxQueueSize=100
+      - Transcription__MaxFileSizeMB=500
+      - Transcription__JobCleanupMaxAgeHours=24
+    volumes:
+      - dotnet-temp:/app/temp
+      - dotnet-logs:/app/logs
+      - ~/.cache/whisper:/root/.cache/whisper
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5226/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - transcription-network
+
+  # Optional: Nginx reverse proxy for load balancing
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: transcription-proxy
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - python-transcription-api
+  #     - dotnet-transcription-api
+  #   networks:
+  #     - transcription-network
+
+volumes:
+  python-temp:
+    driver: local
+  python-logs:
+    driver: local
+  dotnet-temp:
+    driver: local
+  dotnet-logs:
+    driver: local
+
+networks:
+  transcription-network:
+    driver: bridge

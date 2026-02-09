@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ASP.NET Core Transcription API
+  transcription-api:
+    build:
+      context: ./TranscriptionApi
+      dockerfile: Dockerfile
+      args:
+        WHISPER_MODEL_SIZE: medium
+    container_name: transcription-api
+    ports:
+      - "5226:5226"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Transcription__WhisperModelSize=medium
+      - Transcription__MaxConcurrentWorkers=4
+      - Transcription__MaxQueueSize=100
+      - Transcription__MaxFileSizeMB=500
+      - Transcription__JobCleanupMaxAgeHours=24
+    volumes:
+      # Mount volume for temporary audio files
+      - transcription-temp:/app/temp
+      # Mount volume for logs
+      - transcription-logs:/app/logs
+      # Optional: Mount local model cache to avoid re-downloading
+      - ~/.cache/whisper:/root/.cache/whisper
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5226/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - transcription-network
+
+volumes:
+  transcription-temp:
+    driver: local
+  transcription-logs:
+    driver: local
+
+networks:
+  transcription-network:
+    driver: bridge
