@@ -159,7 +159,7 @@ public class TranscriptionController : ControllerBase
             // Clean up the uploaded file
             try
             {
-                if (System.IO.File.Exists(audioFilePath))
+                 if (System.IO.File.Exists(audioFilePath))
                 {
                     System.IO.File.Delete(audioFilePath);
                     _logger.LogDebug("Deleted uploaded audio file: {FilePath}", audioFilePath);

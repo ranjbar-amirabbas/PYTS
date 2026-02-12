@@ -35,7 +35,7 @@ services:
       retries: 3
       start_period: 60s
     networks:
-      - transcription-network
+      - observability
 
   # .NET ASP.NET Core Transcription Service
   dotnet-transcription-api:
@@ -66,7 +66,7 @@ services:
       retries: 3
       start_period: 60s
     networks:
-      - transcription-network
+      - observability
 
   # Optional: Nginx reverse proxy for load balancing
   # nginx:
@@ -80,7 +80,7 @@ services:
   #     - python-transcription-api
   #     - dotnet-transcription-api
   #   networks:
-  #     - transcription-network
+  #     - observability
 
 volumes:
   python-temp:
@@ -91,7 +91,7 @@ volumes:
     driver: local
   dotnet-logs:
     driver: local
-
 networks:
-  transcription-network:
-    driver: bridge
+  observability:
+    external: true
+
