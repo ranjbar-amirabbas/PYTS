@@ -6,9 +6,11 @@
 # =============================================================================
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS base
 
-# Install FFmpeg for audio processing
+# Install FFmpeg and required libraries for Whisper.net
 RUN apt-get update && apt-get install -y \
     ffmpeg \
+    libgomp1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -51,14 +53,32 @@ ARG WHISPER_MODEL_SIZE=medium
 ENV WHISPER_MODEL_SIZE=${WHISPER_MODEL_SIZE}
 
 # Download the GGML model from Hugging Face
-# Note: The code expects ggml-{size}.bin, so we download and rename accordingly
-RUN if [ "$WHISPER_MODEL_SIZE" = "large" ]; then \
-        wget -O /root/.cache/whisper/ggml-large.bin \
-        https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin; \
-    else \
-        wget -O /root/.cache/whisper/ggml-${WHISPER_MODEL_SIZE}.bin \
-        https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${WHISPER_MODEL_SIZE}.bin; \
-    fi
+# Note: Using the correct model URLs for Whisper.net compatibility
+RUN case "$WHISPER_MODEL_SIZE" in \
+        "tiny") \
+            wget -O /root/.cache/whisper/ggml-tiny.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin \
+            ;; \
+        "base") \
+            wget -O /root/.cache/whisper/ggml-base.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin \
+            ;; \
+        "small") \
+            wget -O /root/.cache/whisper/ggml-small.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin \
+            ;; \
+        "medium") \
+            wget -O /root/.cache/whisper/ggml-medium.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin \
+            ;; \
+        "large") \
+            wget -O /root/.cache/whisper/ggml-large.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin \
+            ;; \
+        *) \
+            echo "Invalid WHISPER_MODEL_SIZE: $WHISPER_MODEL_SIZE" && exit 1 \
+            ;; \
+    esac
 
 # =============================================================================
 # Final Stage: Production Image

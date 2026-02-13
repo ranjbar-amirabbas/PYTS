@@ -1,6 +1,7 @@
 namespace TranscriptionApi.Services;
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using TranscriptionApi.Models;
 using Whisper.net;
 using Whisper.net.Ggml;
@@ -141,6 +142,14 @@ public class WhisperModelService : IWhisperModelService, IDisposable
             try
             {
                 var whisperFactory = WhisperFactory.FromPath(modelFilePath);
+                
+                // Log system information for debugging
+                _logger.LogInformation(
+                    "Model loading: SYSTEM_INFO - OS: {OS}, Architecture: {Arch}, ProcessorCount: {Processors}",
+                    Environment.OSVersion,
+                    RuntimeInformation.ProcessArchitecture,
+                    Environment.ProcessorCount);
+                
                 _processor = whisperFactory.CreateBuilder()
                     .WithLanguage("auto") // Auto-detect language
                     .Build();
